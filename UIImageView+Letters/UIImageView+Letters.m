@@ -35,67 +35,73 @@ static const CGFloat kFontResizingProportion = 0.42f;
 
 @implementation UIImageView (Letters)
 
-- (void)setImageWithString:(NSString *)string {
-    [self setImageWithString:string color:nil circular:NO textAttributes:nil];
+- (void)setImageWithString:(NSString *)string atributes:(BOOL) atributes  {
+    [self setImageWithString:string atributes:atributes color:nil circular:NO textAttributes:nil];
 }
 
-- (void)setImageWithString:(NSString *)string color:(UIColor *)color {
-    [self setImageWithString:string color:color circular:NO textAttributes:nil];
+- (void)setImageWithString:(NSString *)string atributes:(BOOL) atributes color:(UIColor *)color {
+    [self setImageWithString:string atributes:atributes color:color circular:NO textAttributes:nil];
 }
 
-- (void)setImageWithString:(NSString *)string color:(UIColor *)color circular:(BOOL)isCircular {
-    [self setImageWithString:string color:color circular:isCircular textAttributes:nil];
+- (void)setImageWithString:(NSString *)string atributes:(BOOL) atributes color:(UIColor *)color circular:(BOOL)isCircular {
+    [self setImageWithString:string atributes:atributes color:color circular:isCircular textAttributes:nil];
 }
 
-- (void)setImageWithString:(NSString *)string color:(UIColor *)color circular:(BOOL)isCircular fontName:(NSString *)fontName {
-    [self setImageWithString:string color:color circular:isCircular textAttributes:@{
+- (void)setImageWithString:(NSString *)string atributes:(BOOL) atributes color:(UIColor *)color circular:(BOOL)isCircular fontName:(NSString *)fontName {
+    [self setImageWithString:string atributes:atributes color:color circular:isCircular textAttributes:@{
                                                                                      NSFontAttributeName:[self fontForFontName:fontName],
                                                                                      NSForegroundColorAttributeName: [UIColor whiteColor]
                                                                                      }];
 }
 
-- (void)setImageWithString:(NSString *)string color:(UIColor *)color circular:(BOOL)isCircular textAttributes:(NSDictionary *)textAttributes {
+- (void)setImageWithString:(NSString *)string atributes:(BOOL) atributes color:(UIColor *)color circular:(BOOL)isCircular textAttributes:(NSDictionary *)textAttributes {
     if (!textAttributes) {
         textAttributes = @{
                            NSFontAttributeName: [self fontForFontName:nil],
                            NSForegroundColorAttributeName: [UIColor whiteColor]
                            };
     }
-    
     NSMutableString *displayString = [NSMutableString stringWithString:@""];
-    
-    NSMutableArray *words = [[string componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] mutableCopy];
-    
-    //
-    // Get first letter of the first and last word
-    //
-    if ([words count]) {
-        NSString *firstWord = [words firstObject];
-        if ([firstWord length]) {
-            // Get character range to handle emoji (emojis consist of 2 characters in sequence)
-            NSRange firstLetterRange = [firstWord rangeOfComposedCharacterSequencesForRange:NSMakeRange(0, 1)];
-            [displayString appendString:[firstWord substringWithRange:firstLetterRange]];
-        }
+
+    if (atributes) {
         
-        if ([words count] >= 2) {
-            NSString *lastWord = [words lastObject];
-            
-            while ([lastWord length] == 0 && [words count] >= 2) {
-                [words removeLastObject];
-                lastWord = [words lastObject];
+        
+        NSMutableArray *words = [[string componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] mutableCopy];
+        
+        //
+        // Get first letter of the first and last word
+        //
+        if ([words count]) {
+            NSString *firstWord = [words firstObject];
+            if ([firstWord length]) {
+                // Get character range to handle emoji (emojis consist of 2 characters in sequence)
+                NSRange firstLetterRange = [firstWord rangeOfComposedCharacterSequencesForRange:NSMakeRange(0, 1)];
+                [displayString appendString:[firstWord substringWithRange:firstLetterRange]];
             }
             
-            if ([words count] > 1) {
-                // Get character range to handle emoji (emojis consist of 2 characters in sequence)
-                NSRange lastLetterRange = [lastWord rangeOfComposedCharacterSequencesForRange:NSMakeRange(0, 1)];
-                [displayString appendString:[lastWord substringWithRange:lastLetterRange]];
+            if ([words count] >= 2) {
+                NSString *lastWord = [words lastObject];
+                
+                while ([lastWord length] == 0 && [words count] >= 2) {
+                    [words removeLastObject];
+                    lastWord = [words lastObject];
+                }
+                
+                if ([words count] > 1) {
+                    // Get character range to handle emoji (emojis consist of 2 characters in sequence)
+                    NSRange lastLetterRange = [lastWord rangeOfComposedCharacterSequencesForRange:NSMakeRange(0, 1)];
+                    [displayString appendString:[lastWord substringWithRange:lastLetterRange]];
+                }
             }
         }
+    } else {
+        displayString = string.mutableCopy;
     }
     
     UIColor *backgroundColor = color ? color : [self randomColor];
 
     self.image = [self imageSnapshotFromText:[displayString uppercaseString] backgroundColor:backgroundColor circular:isCircular textAttributes:textAttributes];
+
 }
 
 #pragma mark - Helpers
